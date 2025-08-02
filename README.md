@@ -1,93 +1,206 @@
-# Pix2Geo - Ship Georeferencing
+# Pix2Geo - Georeferencing Toolkit (From Pixels to Latitude and Longitude)
 
+**pix2geo** is a dual-method pixel-to-geocoordinate georeferencing toolkit designed for maritime situational awareness and optimized for ships. It provides both homography-based and raycasting-based pipelines for converting pixel detections (from bounding boxes or segmentation masks) into latitude/longitude coordinates. This is critical for geospatial visualization of the maritime situation, enabling better awareness and monitoring.
 
+Among the two methods, **homography** has been thoroughly validated in peer-reviewed publications and the author's PhD thesis (see [📚 References](#-references)). Homography works by using a set of pixel↔GPS correspondences to compute a transformation matrix (homography) that maps new image pixels directly to geocoordinates. It achieves an average georeferencing error of **18 m ± 10 m**, making it suitable for real-world maritime applications. More details and evaluation results can be found in the references section. Its main advantage is that it can be applied to any static existing camera installed at port infrastructure.
+The **ShipSG** dataset [(link to download)]](https://zenodo.org/records/15000157) is a benchmark for georeferencing ships from static oblique-view images. It includes pixel-to-GPS correspondences and has been used to validate the homography approach for the first time in the [Sensors 2022 paper](https://doi.org/10.3390/s22072713) and 
 
-## Getting started
+On the other hand, calibrated systems with known intrinsics and extrinsics are also valuable for maritime situational awareness. Raycasting works by projecting 3D rays from the camera through the image detections and computing their intersection with a known ground plane. Its advantage is flexibility: it can be applied to mobile systems. For example, in the MARLIN project, the MODAR system uses a mobile optical and infrared camera, and in the MAREVIS 3D project, raycasting is used with a high-resolution mobile camera (native sensor of 50 MPix).
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+---
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## 📂 Repository Structure
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.dlr.de/mi/marevis3d/pix2geo.git
-git branch -M main
-git push -uf origin main
+pix2geo/                        # Project root
+├── README.md                   # This documentation
+├── assets/                     # Example images & correspondence CSV
+│   ├── img_095.jpg             # Sample image for homography demos (from ShipSG)
+│   ├── img_306.jpg             # Sample image for homography demos (from ShipSG)
+│   ├── raycast_example.jpg     # Sample image for raycast demos
+│   └── shipsg_cam1_mapping.csv # Pixel↔GPS correspondences
+├── configs/                    # YAML config files
+│   ├── config_homography.yaml  # Homography demo settings
+│   └── config_raycast.yaml     # Raycast demo settings
+├── demo_homography_bbox.py     # Homography pipeline (bbox-based)
+├── demo_homography_mask.py     # Homography pipeline (mask-based)
+├── demo_raycast_bbox.py        # Raycasting pipeline (bbox-based)
+├── demo_raycast_mask.py        # Raycasting pipeline (mask-based)
+├── docs/                       # Screenshots of demos
+│   ├── demo_homography_bbox.jpg
+│   ├── demo_homography_mask.jpg
+│   ├── demo_raycast_bbox.jpg
+│   └── demo_raycast_mask.jpg
+├── map_homography_bbox.html    # Generated demo outputs
+├── map_homography_mask.html
+├── map_bbox_with_img.html
+├── map_mask_with_img.html
+└── pix2geo/                    # Main Python package
+    ├── __init__.py
+    ├── config.py               # Load YAML/JSON configs
+    ├── reference_selector.py   # Bottom-center/mode pixel selectors
+    ├── homography/
+    │   ├── __init__.py
+    │   └── compute_homography.py
+    ├── raycasting/
+    │   ├── __init__.py
+    │   └── raycasting_utils.py
+    └── heading/                # (Future) optical-flow heading estimator
+        ├── __init__.py
+        └── heading_estimator.py
 ```
 
-## Integrate with your tools
+---
 
-- [ ] [Set up project integrations](https://gitlab.dlr.de/mi/marevis3d/pix2geo/-/settings/integrations)
+**Prerequisites:**
 
-## Collaborate with your team
+- ultralytics v8.0.192 (YOLOv8): `pip install ultralytics==8.0.192`
+- (Optional) For improved maritime segmentation: ScatYOLOv8+CBAM from [https://gitlab.dlr.de/mi/marlin/scatyolov8\_cbam](https://gitlab.dlr.de/mi/marlin/scatyolov8_cbam)
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+---
 
-## Test and Deploy
+## 🔧 Configuration
 
-Use the built-in continuous integration in GitLab.
+Both pipelines use a YAML config under `configs/`:
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```yaml
+# Pixel↔GPS correspondences
+correspondences_csv: "assets/shipsg_cam1_mapping.csv"
+csv:
+  delimiter: ","
 
-***
+# Input image & detection models
+image: "assets/img_306.jpg"
+model:
+  bbox:    "pix2geo/models/yolov8x.pt"
+  segment: "pix2geo/models/yolov8x-seg.pt"
 
-# Editing this README
+# Classes to detect (COCO indices)
+classes: [8]  # e.g. 8 = boat, 2 = car
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```yaml
+image: "assets/raycast_example.jpg"
+model:
+  bbox:    "pix2geo/models/yolov8x.pt"
+  segment: "pix2geo/models/yolov8x-seg.pt"
 
-## Suggestions for a good README
+classes: [8]
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+camera:
+  lat:   53.522028
+  lon:   8.583522
+  height: 13.21      # meters above waterline
+  fov:    74.35      # horizontal field of view in deg
+  pitch:  39.0
+  yaw:    1.36
+  roll:   0.05
 
-## Name
-Choose a self-explaining name for your project.
+plane:
+  normal: [0, 0, 1]
+  point:  [0, 0, 0]
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+---
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## 🚀 Usage Examples
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### 1. Homography & Bounding Box
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+```bash
+python demo_homography_bbox.py configs/config_homography.yaml
+```
+![Demo Homography BBox](docs/demo_homography_bbox.jpg)
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### 2. Homography & Mask Segmentation
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```bash
+python demo_homography_mask.py configs/config_homography.yaml
+```
+![Demo Homography Mask](docs/demo_homography_mask.jpg)
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### 3. Raycasting & Bounding Box
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+```bash
+python demo_raycast_bbox.py configs/config_raycast.yaml
+```
+![Demo Raycast BBox](docs/demo_raycast_bbox.jpg)
 
-## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+### 4. Raycasting & Mask Segmentation
+
+```bash
+python demo_raycast_mask.py configs/config_raycast.yaml
+```
+![Demo Raycast Mask](docs/demo_raycast_mask.jpg)
+
+
+---
+
+## Pixel Selection for Georeferencing
+
+To georeference each detection, Pix2Geo selects a specific pixel that best represents the ship's location on the waterline.
+
+### Bounding Box
+
+- **Selection logic:** Bottom-center of the bounding box
+- **Function:** [`select_bottom_center_bbox`](pix2geo/reference_selector.py)
+- **Used in:** `demo_homography_bbox.py`, `demo_raycast_bbox.py`
+
+```python
+from pix2geo.reference_selector import select_bottom_center_bbox
+```
+
+### Segmentation Mask
+
+- **Selection logic:** Bottom-most pixel with the most frequent x-coordinate (horizontal mode)
+- **Function:** [`select_bottom_mode_pixel`](pix2geo/reference_selector.py)
+- **Used in:** `demo_homography_mask.py`, `demo_raycast_mask.py`
+
+```python
+from pix2geo.reference_selector import select_bottom_mode_pixel
+```
+
+This strategy improves consistency and accuracy when detecting ship positions, especially in tilted or occluded views.
+
+---
+
+
+---
+
+## 📦 Package API
+
+You can also import core functions:
+
+```python
+from pix2geo.homography.compute_homography import compute_homography, apply_homography
+from pix2geo.raycasting.raycasting_utils import calcRotationMatrix, calcCameraRay, intersectPlane
+```
+
+Use `pix2geo.config.load_config(path)` to load any YAML/JSON settings.
+
+---
+
+## 💡 Future Work
+
+- **Heading estimation** via optical‑flow (`pix2geo/heading/heading_estimator.py`).
+- Support for multi-camera calibration fusion.
+- CLI packaging under `console_scripts` in `setup.py`.
+
+---
+
+## 📚 References
+
+- Carrillo-Perez, B. (2024). *Real-time ship recognition and georeferencing for the improvement of maritime situational awareness*. PhD thesis, University of Bremen. [https://doi.org/10.26092/elib/3265](https://doi.org/10.26092/elib/3265)
+- Carrillo-Perez, B., Bueno, A., Barnes, S., & Stephan, M. (2023). *Improving YOLOv8 with Scattering Transform and Attention for Maritime Awareness*. In IEEE International Symposium on Signal and Image Processing and Analysis (ISPA). [https://doi.org/10.1109/ISPA58351.2023.10279352](https://doi.org/10.1109/ISPA58351.2023.10279352)
+- Carrillo-Perez, B., Barnes, S., & Stephan, M. (2022). *Ship Segmentation and Georeferencing from Static Oblique View Images*. *Sensors*, 22(7), 2713. [https://doi.org/10.3390/s22072713](https://doi.org/10.3390/s22072713)
+
+---
+
+## 📄 License
+
+© 2025 DLR Institute for the Protection of Maritime Infrastructures
+
