@@ -1,0 +1,15 @@
+# configs/config_homography.yaml
+
+# your pixel↔GPS mapping
+correspondences_csv: "assets/shipsg_cam1_mapping.csv"
+csv:
+  delimiter: ","
+
+# image + models (so the demo scripts can load & detect)
+image: "assets/img_306.jpg" #"assets/img_306.jpg"
+model:
+  bbox:    "pix2geo/models/yolov8x.pt"
+  segment: "pix2geo/models/yolov8x-seg.pt"
+classes: [8] #2 is "car" and 8 is “boat” in COCO, pick any classes from your dataset
+
+

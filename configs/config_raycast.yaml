@@ -1,0 +1,19 @@
+# example_config.yaml
+image: "assets/raycast_example.jpg" #width and height will be calculated in the code
+model:
+  bbox:    "pix2geo/models/yolov8x.pt"
+  segment: "pix2geo/models/yolov8x-seg.pt"
+classes: [2, 8] #2 is "car" and 8 is “boat” in COCO, pick any classes from your dataset
+
+camera:
+  lat: 53.522028
+  lon: 8.583522
+  height: 11.71
+  fov: 74.35 #horizontal FoV
+  pitch: 88.0
+  yaw: 2.5660
+  roll: -12.1180
+
+plane:
+  normal: [0, 0, 1] # Ground plane (water surface) is assumed horizontal
+  point: [0, 0, 0]  # A point on that plane; if you take Z=0 at waterline, this can stay [0,0,0]
