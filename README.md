@@ -204,5 +204,5 @@ Use `pix2geo.config.load_config(path)` to load any YAML/JSON settings.
 
 © 2025 DLR Institute for the Protection of Maritime Infrastructures
 
-Software Development Level 1
+Software Development Level 2
 
