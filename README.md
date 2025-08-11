@@ -171,7 +171,7 @@ This strategy improves consistency and accuracy when detecting ship positions, e
 
 ---
 
-## 📦 Package API
+## Package API
 
 You can also import core functions:
 
@@ -184,7 +184,7 @@ Use `pix2geo.config.load_config(path)` to load any YAML/JSON settings.
 
 ---
 
-## 💡 Future Work
+## Future Work
 
 - **Heading estimation** via optical‑flow (`pix2geo/heading/heading_estimator.py`).
 - Support for multi-camera calibration fusion.
@@ -192,7 +192,7 @@ Use `pix2geo.config.load_config(path)` to load any YAML/JSON settings.
 
 ---
 
-## 📚 References
+## References
 
 - Carrillo-Perez, B. (2024). *Real-time ship recognition and georeferencing for the improvement of maritime situational awareness*. PhD thesis, University of Bremen. [https://doi.org/10.26092/elib/3265](https://doi.org/10.26092/elib/3265)
 - Carrillo-Perez, B., Bueno, A., Barnes, S., & Stephan, M. (2023). *Improving YOLOv8 with Scattering Transform and Attention for Maritime Awareness*. In IEEE International Symposium on Signal and Image Processing and Analysis (ISPA). [https://doi.org/10.1109/ISPA58351.2023.10279352](https://doi.org/10.1109/ISPA58351.2023.10279352)
@@ -200,7 +200,9 @@ Use `pix2geo.config.load_config(path)` to load any YAML/JSON settings.
 
 ---
 
-## 📄 License
+## License
 
 © 2025 DLR Institute for the Protection of Maritime Infrastructures
+
+Software Development Level 1
 
