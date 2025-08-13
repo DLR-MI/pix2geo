@@ -2,7 +2,7 @@
 
 **pix2geo** is a dual-method pixel-to-geocoordinate georeferencing toolkit designed for maritime situational awareness and optimized for ships. It provides both homography-based and raycasting-based pipelines for converting pixel detections (from bounding boxes or segmentation masks) into latitude/longitude coordinates. This is critical for geospatial visualization of the maritime situation, enabling better awareness and monitoring.
 
-Among the two methods, **homography** has been thoroughly validated in peer-reviewed publications and the author's PhD thesis (see [📚 References](#-references)). Homography works by using a set of pixel↔GPS correspondences to compute a transformation matrix (homography) that maps new image pixels directly to geocoordinates. It achieves an average georeferencing error of **18 m ± 10 m**, making it suitable for real-world maritime applications. More details and evaluation results can be found in the references section. Its main advantage is that it can be applied to any static existing camera installed at port infrastructure.
+Among the two methods, **homography** has been thoroughly validated in peer-reviewed publications and the author's work (see [📚 References](#-references)). Homography works by using a set of pixel↔GPS correspondences to compute a transformation matrix (homography) that maps new image pixels directly to geocoordinates. It achieves an average georeferencing error of **18 m ± 10 m**, making it suitable for real-world maritime applications. More details and evaluation results can be found in the references section. Its main advantage is that it can be applied to any static existing camera installed at port infrastructure.
 The **ShipSG** dataset [(link to download)](https://zenodo.org/records/15000157) is a benchmark for georeferencing ships from static oblique-view images. It includes pixel-to-GPS correspondences and has been used to validate the homography approach for the first time in the [Sensors 2022 paper](https://doi.org/10.3390/s22072713) and 
 
 On the other hand, calibrated systems with known intrinsics and extrinsics are also valuable for maritime situational awareness. **Raycasting** works by projecting 3D rays from the camera through the image detections and computing their intersection with a known ground plane. Its advantage is flexibility: it can be applied to mobile systems. For example, in the MARLIN project, the MODAR system uses a mobile optical and infrared camera, and in the MAREVIS 3D project, raycasting is used with a high-resolution mobile camera (native sensor of 50 MPix).
@@ -54,7 +54,7 @@ pix2geo/                        # Project root
 
 **Prerequisites:**
 
-- ultralytics v8.0.192 (YOLOv8): `pip install ultralytics==8.0.192`
+- [ultralytics](https://www.ultralytics.com/) (YOLO object detector/segmentation): `pip install ultralytics`
 - (Optional) For improved maritime segmentation: ScatYOLOv8+CBAM from [https://gitlab.dlr.de/mi/marlin/scatyolov8\_cbam](https://gitlab.dlr.de/mi/marlin/scatyolov8_cbam)
 
 ---
@@ -194,9 +194,10 @@ Use `pix2geo.config.load_config(path)` to load any YAML/JSON settings.
 
 ## References
 
-- Carrillo-Perez, B. (2024). *Real-time ship recognition and georeferencing for the improvement of maritime situational awareness*. PhD thesis, University of Bremen. [https://doi.org/10.26092/elib/3265](https://doi.org/10.26092/elib/3265)
-- Carrillo-Perez, B., Bueno, A., Barnes, S., & Stephan, M. (2023). *Improving YOLOv8 with Scattering Transform and Attention for Maritime Awareness*. In IEEE International Symposium on Signal and Image Processing and Analysis (ISPA). [https://doi.org/10.1109/ISPA58351.2023.10279352](https://doi.org/10.1109/ISPA58351.2023.10279352)
 - Carrillo-Perez, B., Barnes, S., & Stephan, M. (2022). *Ship Segmentation and Georeferencing from Static Oblique View Images*. *Sensors*, 22(7), 2713. [https://doi.org/10.3390/s22072713](https://doi.org/10.3390/s22072713)
+- Carrillo-Perez, B., Bueno, A., Barnes, S., & Stephan, M. (2023). *Improving YOLOv8 with Scattering Transform and Attention for Maritime Awareness*. In IEEE International Symposium on Signal and Image Processing and Analysis (ISPA). [https://doi.org/10.1109/ISPA58351.2023.10279352](https://doi.org/10.1109/ISPA58351.2023.10279352)
+- Carrillo-Perez, B. (2024). *Real-time ship recognition and georeferencing for the improvement of maritime situational awareness*. PhD thesis, University of Bremen. [https://doi.org/10.26092/elib/3265](https://doi.org/10.26092/elib/3265)
+
 
 ---
 
